@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Applicants{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">
+      Applicants for {{ offer.role_name }} at {{ offer.company.company_name }}
+    </h1>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'placements_admin_dashboard' %}">
+      Back
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Program</th>
+              <th>CPI</th>
+              <th>Application Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for application in applications %}
+              <tr>
+                <td>{{ application.student.user.name }}</td>
+                <td>{{ application.student.program.degree }} - {{ application.student.program.branch }}</td>
+                <td>{{ application.student.curr_cpi }}</td>
+                <td>{{ application.status }}</td>
+                <td>
+                  <form method="post" action="{% url 'update_application_status' %}" class="d-inline-flex gap-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="application_id" value="{{ application.id }}">
+                    <button type="submit" name="status" value="Shortlisted" class="btn btn-outline-primary btn-sm">
+                      Shortlist
+                    </button>
+                    <button type="submit" name="status" value="Rejected" class="btn btn-outline-danger btn-sm">
+                      Reject
+                    </button>
+                    <button type="submit" name="status" value="Offered" class="btn btn-outline-success btn-sm">
+                      Offer
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No applications for this offer.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

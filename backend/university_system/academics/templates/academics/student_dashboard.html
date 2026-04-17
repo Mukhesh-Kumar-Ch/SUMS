@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Student Dashboard</h1>
+      <p class="text-muted mb-0 small">
+        Register for the current semester, review your cart, and track your enrollments.
+      </p>
+      <div class="mt-2">
+        <span class="text-muted small me-2">Roll Number:</span>
+        <span class="badge bg-primary-subtle text-primary-emphasis">{{ student.roll_number }}</span>
+      </div>
+      <div class="mt-2">
+        <span class="text-muted small me-2">Academic Status:</span>
+        {% if student.academic_status == 'NORMAL' %}
+          <span class="badge bg-success-subtle text-success-emphasis">Good Standing</span>
+        {% elif student.academic_status == 'PROBATION' %}
+          <span class="badge bg-warning text-dark">Academic Probation</span>
+        {% elif student.academic_status == 'DISCONTINUED' %}
+          <span class="badge bg-danger">Discontinued</span>
+        {% else %}
+          <span class="badge bg-secondary">{{ student.academic_status }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'student_transcript' %}">Transcript</a>
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'student_placement_dashboard' %}">Placements</a>
+      <a class="btn btn-outline-secondary btn-sm" href="{% url 'change_password' %}">Change Password</a>
+    </div>
+  </div>
+
+  <!-- 1. Available Courses -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Available Courses (Semester {{ current_semester }}, Academic Year {{ current_academic_year }})</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-bordered table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Semester</th>
+              <th>Academic Year</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in offering_rows %}
+              <tr>
+                <td>{{ row.offering.course.course_code }}</td>
+                <td>{{ row.offering.course.course_name }}</td>
+                <td>{{ row.offering.semester_no }}</td>
+                <td>{{ row.offering.academic_year }}</td>
+                <td>
+                  {% if row.status == 'available' %}
+                    <a class="btn btn-primary btn-sm" href="{% url 'add_to_cart' row.offering.offering_id %}">
+                      Add to Cart
+                    </a>
+                  {% else %}
+                    <button class="btn btn-secondary btn-sm" type="button" disabled aria-disabled="true">
+                      Add to Cart
+                    </button>
+                    <div class="text-muted small mt-1">{{ row.status_message }}</div>
+                    {% if row.status == 'already_in_cart' %}
+                      <span class="badge bg-info-subtle text-info-emphasis mt-1">In Cart</span>
+                    {% elif row.status == 'already_enrolled' %}
+                      <span class="badge bg-success-subtle text-success-emphasis mt-1">Enrolled</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No course offerings found for your current semester.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Cart -->
+  {% if not registration_locked %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Cart Courses</h2>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped table-bordered table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Semester</th>
+                <th>Academic Year</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+                <tr>
+                  <td>{{ item.offering.course.course_code }}</td>
+                  <td>{{ item.offering.course.course_name }}</td>
+                  <td>{{ item.offering.semester_no }}</td>
+                  <td>{{ item.offering.academic_year }}</td>
+                  <td>
+                    <a class="btn btn-danger btn-sm" href="{% url 'remove_from_cart' item.cart_id %}">
+                      Remove
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">Your cart is empty.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3">
+          <a
+            class="btn btn-success"
+            href="{% url 'submit_enrollment' %}"
+            onclick="return confirm('Are you sure you want to submit enrollment? Once submitted, courses cannot be changed.');"
+          >
+            Submit Enrollment
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- 3. Enrolled Courses -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Enrolled Courses</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-bordered table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Academic Year</th>
+              <th>Semester</th>
+              <th>Faculty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for enrollment in enrollments %}
+              <tr>
+                <td>{{ enrollment.offering.course.course_code }}</td>
+                <td>{{ enrollment.offering.course.course_name }}</td>
+                <td>{{ enrollment.offering.academic_year }}</td>
+                <td>{{ enrollment.offering.semester_no }}</td>
+                <td>
+                  {% if enrollment.faculty %}
+                    {{ enrollment.faculty.user.name }}
+                  {% else %}
+                    <span class="text-muted">Faculty not assigned yet</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No enrolled courses found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Backlog Courses -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Backlog Courses</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-bordered table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Last Attempt Semester</th>
+              <th>Eligibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in backlog_rows %}
+              <tr>
+                <td>{{ row.course_code }}</td>
+                <td>{{ row.course_name }}</td>
+                <td>{{ row.last_attempt_semester }}</td>
+                <td>{{ row.eligible_parity_message }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4">No backlog courses.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

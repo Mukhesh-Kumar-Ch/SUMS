@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Mark Attendance</h1>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'course_students' offering.offering_id %}">
+      Back to Course Students
+    </a>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <div class="text-muted">Course</div>
+          <div class="fw-semibold">{{ offering.course.course_code }} - {{ offering.course.course_name }}</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Academic Year</div>
+          <div class="fw-semibold">{{ offering.academic_year }}</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Semester</div>
+          <div class="fw-semibold">{{ offering.semester_no }}</div>
+        </div>
+      </div>
+
+      {% if marked_dates %}
+        <div class="alert alert-info mt-3 mb-0 py-2" role="alert">
+          Attendance already marked for: {{ marked_dates|join:", " }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-12 col-md-4">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+          </div>
+          <div class="col-12 col-md-8 text-md-end">
+            <button type="submit" class="btn btn-success">
+              Submit Attendance
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th class="text-center">Present</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for enrollment in enrollments %}
+                <tr>
+                  <td>{{ enrollment.student.user.name }}</td>
+                  <td class="text-center">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="present_students"
+                      value="{{ enrollment.enrollment_id }}"
+                    >
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="2">No students assigned to this offering.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

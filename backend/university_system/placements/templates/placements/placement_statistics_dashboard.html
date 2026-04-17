@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Placement Statistics Dashboard{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Placement Statistics Dashboard</h1>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Summary</h2>
+      <div class="row g-3">
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Total Eligible Students</div>
+          <div class="fw-semibold">{{ total_students_eligible }}</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Total Placed Students</div>
+          <div class="fw-semibold">{{ total_students_placed }}</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Placement Percentage</div>
+          <div class="fw-semibold">{{ placement_percentage|floatformat:2 }}%</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Average Package Offered</div>
+          <div class="fw-semibold">{{ average_package_offered|default:0|floatformat:2 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Top Recruiting Companies</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Total Hires</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for company in top_recruiting_companies %}
+              <tr>
+                <td>{{ company.placement_offer__company__company_name }}</td>
+                <td>{{ company.total_hires }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2">No accepted offers available yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

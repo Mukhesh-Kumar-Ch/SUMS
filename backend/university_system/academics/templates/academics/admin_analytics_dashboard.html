@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Analytics Dashboard{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Admin Analytics Dashboard</h1>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Average CPI and Placement Rate per Program</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Program</th>
+              <th>Average CPI</th>
+              <th>Total Students</th>
+              <th>Students Placed</th>
+              <th>Placement Rate (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stat in program_stats %}
+              <tr>
+                <td>{{ stat.program__degree }} - {{ stat.program__branch }}</td>
+                <td>{{ stat.avg_cpi|default:0|floatformat:2 }}</td>
+                <td>{{ stat.total_students }}</td>
+                <td>{{ stat.placed_students }}</td>
+                <td>{{ stat.placement_rate|floatformat:2 }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No program data available.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-2">Number of Students Placed</h2>
+      <div class="display-6 mb-0">{{ placed_students_count }}</div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Top Recruiting Companies</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Accepted Offers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for company in top_recruiting_companies %}
+              <tr>
+                <td>{{ company.placement_offer__company__company_name }}</td>
+                <td>{{ company.total_hires }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2">No accepted offers yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Faculty Teaching Load</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Faculty</th>
+              <th>Assigned Students</th>
+              <th>Distinct Offerings</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for load in faculty_teaching_load %}
+              <tr>
+                <td>{{ load.faculty__user__name }}</td>
+                <td>{{ load.student_count }}</td>
+                <td>{{ load.offering_count }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3">No teaching load data available.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

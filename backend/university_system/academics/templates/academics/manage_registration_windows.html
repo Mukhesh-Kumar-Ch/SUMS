@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Registration Windows{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Manage Registration Windows</h1>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">{% if editing_window %}Edit Window{% else %}Create Window{% endif %}</h2>
+
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+        {% if editing_window %}
+          <input type="hidden" name="window_id" value="{{ editing_window.id }}">
+        {% endif %}
+
+        <div class="col-12 col-md-6">
+          <label for="semester_no" class="form-label">Semester No</label>
+          <input
+            type="number"
+            id="semester_no"
+            name="semester_no"
+            min="1"
+            required
+            class="form-control"
+            value="{% if editing_window %}{{ editing_window.semester_no }}{% endif %}"
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="academic_year" class="form-label">Academic Year</label>
+          <input
+            type="text"
+            id="academic_year"
+            name="academic_year"
+            maxlength="20"
+            required
+            class="form-control"
+            value="{% if editing_window %}{{ editing_window.academic_year }}{% endif %}"
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="start_datetime" class="form-label">Start Datetime</label>
+          <input
+            type="datetime-local"
+            id="start_datetime"
+            name="start_datetime"
+            required
+            class="form-control"
+            value="{% if editing_window %}{{ editing_window.start_datetime|date:'Y-m-d\\TH:i' }}{% endif %}"
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="end_datetime" class="form-label">End Datetime</label>
+          <input
+            type="datetime-local"
+            id="end_datetime"
+            name="end_datetime"
+            required
+            class="form-control"
+            value="{% if editing_window %}{{ editing_window.end_datetime|date:'Y-m-d\\TH:i' }}{% endif %}"
+          />
+        </div>
+
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary">
+            {% if editing_window %}Update Window{% else %}Create Window{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Existing Windows</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Semester</th>
+              <th>Academic Year</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for window in windows %}
+              <tr>
+                <td>{{ window.semester_no }}</td>
+                <td>{{ window.academic_year }}</td>
+                <td>{{ window.start_datetime|date:"d M Y H:i" }}</td>
+                <td>{{ window.end_datetime|date:"d M Y H:i" }}</td>
+                <td>
+                  {% if window.is_open %}
+                    <span class="badge text-bg-success">Open</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Closed</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a class="btn btn-outline-primary btn-sm" href="?edit={{ window.id }}">
+                    Edit
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6">No registration windows configured.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

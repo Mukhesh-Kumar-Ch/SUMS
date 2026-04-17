@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/buttons.css' %}">
+{% endblock %}
+
+{% block title %}Assign Faculty to Selected Enrollments{% endblock %}
+
+{% block content %}
+  <div id="content-main">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="action" value="assign_faculty_to_selected_enrollments">
+      <input type="hidden" name="apply" value="1">
+      {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}">
+      {% endfor %}
+
+      <fieldset class="module aligned">
+        <div class="form-row">
+          <div>
+            <p>Choose a faculty member and apply it to all selected enrollments.</p>
+            <p><strong>Selected enrollments:</strong> {{ queryset|length }}</p>
+          </div>
+        </div>
+        <div class="form-row field-faculty">
+          <div>
+            <label for="id_faculty">Faculty:</label>
+            {{ form.faculty }}
+            {% if form.faculty.errors %}
+              <p class="errornote">{{ form.faculty.errors|striptags }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="submit-row">
+        <input type="submit" value="Apply Faculty" class="default">
+        <a class="button cancel-link" href="..">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

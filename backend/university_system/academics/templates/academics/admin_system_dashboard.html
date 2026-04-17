@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}System Health Dashboard{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'admin/css/buttons.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="mb-3">
+    <h1 class="h3 mb-0">System Health Dashboard</h1>
+    {% if admin_user %}
+      <div class="small text-muted mt-1">Admin ID: <span class="fw-semibold">{{ admin_user.admin_id }}</span></div>
+    {% endif %}
+  </div>
+
+  {% if profile_user and profile_user.user_type == 'ADMIN' %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h2 class="h6 mb-2">Semester Processing</h2>
+        <p class="text-muted small mb-3">Process SPI/CPI and promote students only when semester grading is complete.</p>
+        <form method="post" action="{% url 'process_semester_results' %}" novalidate>
+          {% csrf_token %}
+          <div class="submit-row">
+            <button type="submit" class="default">Process Semester Results</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Total Students</td><td>{{ metrics.total_students }}</td></tr>
+            <tr><td>Total Faculty</td><td>{{ metrics.total_faculty }}</td></tr>
+            <tr><td>Total Courses</td><td>{{ metrics.total_courses }}</td></tr>
+            <tr><td>Total Course Offerings</td><td>{{ metrics.total_course_offerings }}</td></tr>
+            <tr><td>Total Enrollments</td><td>{{ metrics.total_enrollments }}</td></tr>
+            <tr><td>Total Placement Offers</td><td>{{ metrics.total_placement_offers }}</td></tr>
+            <tr><td>Total Applications</td><td>{{ metrics.total_applications }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Placement Dashboard{% endblock %}
+
+{% block content %}
+  <div class="mb-3">
+    <h1 class="h3 mb-0">Admin Placement Dashboard</h1>
+    {% if profile_user and profile_user.user_type == 'ADMIN' %}
+      <div class="small text-muted mt-1">Admin ID: <span class="fw-semibold">{{ profile_user.admin.admin_id }}</span></div>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Companies</h2>
+
+          {% if companies %}
+            <ul class="list-group list-group-flush mb-3">
+              {% for company in companies %}
+                <li class="list-group-item px-0">
+                  <span class="fw-semibold">{{ company.company_name }}</span>
+                  <span class="text-muted"> - {{ company.industry_type }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-3">No companies added yet.</p>
+          {% endif %}
+
+          <h2 class="h5 mb-3">Create Company</h2>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_company">
+
+            <div class="mb-3">
+              <label class="form-label" for="company_name">Company Name</label>
+              <input class="form-control" id="company_name" type="text" name="company_name" placeholder="Company Name" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="contact">Contact</label>
+              <input class="form-control" id="contact" type="text" name="contact" placeholder="Contact" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-control" id="email" type="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="industry_type">Industry Type</label>
+              <input class="form-control" id="industry_type" type="text" name="industry_type" placeholder="Industry Type" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Create Company</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Create Placement Offer</h2>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_offer">
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="company_id">Company</label>
+                <select class="form-select" id="company_id" name="company_id" required>
+                  {% for company in companies %}
+                    <option value="{{ company.company_id }}">{{ company.company_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="role_name">Role Name</label>
+                <input class="form-control" id="role_name" type="text" name="role_name" placeholder="Role Name" required>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="package_ctc">Package CTC</label>
+                <input class="form-control" id="package_ctc" type="number" name="package_ctc" placeholder="Package CTC" min="0" step="0.01" required>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="offer_type">Offer Type</label>
+                <input class="form-control" id="offer_type" type="text" name="offer_type" placeholder="Offer Type" required>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="min_cpi">Minimum CPI</label>
+                <input class="form-control" id="min_cpi" type="number" name="min_cpi" placeholder="Minimum CPI" min="0" max="10" step="0.01" value="0" required>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="max_backlogs">Max Backlogs</label>
+                <input class="form-control" id="max_backlogs" type="number" name="max_backlogs" placeholder="Max Backlogs" min="0" step="1" value="0" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="application_deadline">Application Deadline</label>
+                <input class="form-control" id="application_deadline" type="datetime-local" name="application_deadline" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="allowed_programs">Allowed Programs:</label>
+                <select
+                  name="allowed_programs"
+                  id="allowed_programs"
+                  class="form-select"
+                  multiple
+                  style="min-height: 160px;"
+                >
+                  {% for program in programs %}
+                    <option value="{{ program.pk }}">{{ program.degree }} - {{ program.branch }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">Create Offer</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Placement Offers</h2>
+
+          <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Company</th>
+                  <th>Role</th>
+                  <th>Package CTC</th>
+                  <th>Offer Type</th>
+                  <th>Min CPI</th>
+                  <th>Max Backlogs</th>
+                  <th>Deadline</th>
+                  <th>Applicants</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for offer in offers %}
+                  <tr>
+                    <td>{{ offer.company.company_name }}</td>
+                    <td>{{ offer.role_name }}</td>
+                    <td>{{ offer.package_ctc }}</td>
+                    <td>{{ offer.offer_type }}</td>
+                    <td>{{ offer.min_cpi }}</td>
+                    <td>{{ offer.max_backlogs }}</td>
+                    <td>{{ offer.application_deadline|date:"d M Y H:i" }}</td>
+                    <td>
+                      <a class="btn btn-outline-primary btn-sm" href="{% url 'placements_view_applicants' offer.pk %}">
+                        View Applicants
+                      </a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="8">No placement offers available.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

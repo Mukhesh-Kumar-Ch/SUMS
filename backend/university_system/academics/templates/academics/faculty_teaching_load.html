@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Teaching Load{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Faculty Teaching Load Dashboard</h1>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Faculty</th>
+              <th>Department</th>
+              <th>Total Students Assigned</th>
+              <th>Distinct Courses Taught</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for faculty in faculty_load %}
+              <tr>
+                <td>{{ faculty.user.name }}</td>
+                <td>{{ faculty.department.department_name }}</td>
+                <td>{{ faculty.total_students }}</td>
+                <td>{{ faculty.courses_taught }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4">No faculty load data available.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Student Placement Dashboard{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Student Placement Dashboard</h1>
+      <p class="text-muted mb-0 small">
+        Explore eligible roles, track your applications, and review your placement status.
+      </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'student_dashboard' %}">Academics</a>
+    </div>
+  </div>
+
+  {% if final_outcome %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Placement Secured</h2>
+        {% if accepted_application %}
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <div class="text-muted">Company</div>
+              <div class="fw-semibold">{{ accepted_application.placement_offer.company.company_name }}</div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="text-muted">Role</div>
+              <div class="fw-semibold">{{ accepted_application.placement_offer.role_name }}</div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="text-muted">Package</div>
+              <div class="fw-semibold">{{ accepted_application.placement_offer.package_ctc }}</div>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">Placement details are not available.</p>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    {% if has_accepted_offer %}
+      <div class="alert alert-warning" role="alert">
+        You have already accepted an offer. No further actions allowed.
+      </div>
+    {% endif %}
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Eligible Companies</h2>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Package</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for offer in eligible_offers %}
+                <tr>
+                  <td>{{ offer.company.company_name }}</td>
+                  <td>{{ offer.role_name }}</td>
+                  <td>{{ offer.package_ctc }}</td>
+                  <td>{{ offer.application_deadline|date:"d M Y H:i" }}</td>
+                  <td>
+                    {% if offer.application %}
+                      <span class="badge text-bg-light border">{{ offer.application.status }}</span>
+                    {% else %}
+                      <span class="badge text-bg-secondary">Not Applied</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if offer.application %}
+                      <span class="badge text-bg-secondary">Applied</span>
+                    {% else %}
+                      <a class="btn btn-primary btn-sm" href="{% url 'apply_for_offer' offer.pk %}">Apply</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6">No eligible placement offers available.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Applied Companies</h2>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Applied At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for application in applications %}
+                <tr>
+                  <td>{{ application.placement_offer.company.company_name }}</td>
+                  <td>{{ application.placement_offer.role_name }}</td>
+                  <td>
+                    <span class="badge text-bg-light border">{{ application.status }}</span>
+                  </td>
+                  <td>{{ application.applied_at|date:"d M Y H:i" }}</td>
+                  <td>
+                    {% if application.status == 'Accepted' %}
+                      <span class="badge text-bg-success">Offer Accepted</span>
+                      <div class="mt-2 d-flex gap-1">
+                        <button class="btn btn-secondary btn-sm" disabled>Accept</button>
+                        <button class="btn btn-secondary btn-sm" disabled>Reject</button>
+                      </div>
+                    {% elif application.status == 'Rejected' %}
+                      <span class="badge text-bg-danger">Application Rejected</span>
+                    {% elif application.status == 'Applied' or application.status == 'Shortlisted' or application.status == 'Offered' %}
+                      {% if has_accepted_offer %}
+                        <div class="d-flex gap-1">
+                          <button class="btn btn-secondary btn-sm" disabled>Accept</button>
+                          <button class="btn btn-secondary btn-sm" disabled>Reject</button>
+                        </div>
+                      {% else %}
+                        <div class="d-flex gap-1">
+                          <a class="btn btn-success btn-sm"
+                             href="{% url 'accept_offer' application.placement_offer_id %}"
+                             onclick="return confirm('Are you sure? This action cannot be undone.');">
+                            Accept
+                          </a>
+                          <a class="btn btn-outline-danger btn-sm"
+                             href="{% url 'reject_offer' application.placement_offer_id %}"
+                             onclick="return confirm('Are you sure you want to reject this offer?');">
+                            Reject
+                          </a>
+                        </div>
+                      {% endif %}
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">No applications yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

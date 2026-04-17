@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Allocate Faculty{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Allocate Faculty</h1>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <div class="text-muted">Course</div>
+          <div class="fw-semibold">
+            {{ offering.course.course_code }} - {{ offering.course.course_name }}
+          </div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Academic Year</div>
+          <div class="fw-semibold">{{ offering.academic_year }}</div>
+        </div>
+        <div class="col-12 col-md-3">
+          <div class="text-muted">Semester</div>
+          <div class="fw-semibold">{{ offering.semester_no }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Current Faculty</th>
+              <th>Assign Faculty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for enrollment in enrollments %}
+              <tr>
+                <td>{{ enrollment.student.user.name }}</td>
+                <td>
+                  {% if enrollment.faculty %}
+                    {{ enrollment.faculty.user.name }}
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form
+                    method="post"
+                    action="{% url 'assign_faculty_to_enrollment' %}"
+                    class="d-flex justify-content-start gap-2 flex-wrap"
+                  >
+                    {% csrf_token %}
+                    <input type="hidden" name="enrollment_id" value="{{ enrollment.enrollment_id }}">
+                    <select name="faculty_id" class="form-select form-select-sm" required style="max-width: 260px;">
+                      <option value="" disabled selected>Select faculty</option>
+                      {% for faculty in faculty_list %}
+                        <option value="{{ faculty.pk }}">{{ faculty.user.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3">No enrollments found for this offering.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

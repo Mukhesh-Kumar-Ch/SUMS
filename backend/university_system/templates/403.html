@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5 text-center">
+          <h1 class="h3 mb-3 text-danger">Access Denied</h1>
+          <p class="lead mb-2">You are not authorized to access this page</p>
+          <p class="text-muted mb-4">{{ forbidden_message|default:"Please contact your administrator if you believe this is a mistake." }}</p>
+
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            {% if request.user.is_authenticated %}
+              {% if profile_user and profile_user.user_type == "STUDENT" %}
+                <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+              {% elif profile_user and profile_user.user_type == "FACULTY" %}
+                <a href="{% url 'faculty_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+              {% elif profile_user and profile_user.user_type == "ADMIN" %}
+                <a href="{% url 'admin_system_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Back to Dashboard</a>
+              {% endif %}
+              <a href="{% url 'logout' %}" class="btn btn-outline-secondary">Logout</a>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
